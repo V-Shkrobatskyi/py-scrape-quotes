@@ -40,8 +40,10 @@ def parse_single_author(author_link: str) -> Author:
     author = Author(
         name=str(author_page.select_one(".author-title").text),
         born_date=str(author_page.select_one(".author-born-date").text),
-        born_location=str(author_page.select_one(".author-born-location").text),
-        description=str(author_page.select_one(".author-description").text)
+        born_location=str(
+            author_page.select_one(".author-born-location").text
+        ),
+        description=str(author_page.select_one(".author-description").text),
     )
 
     author_cache[author_link] = author
@@ -55,7 +57,7 @@ def parse_single_quote(quote: Tag) -> Quote:
     return Quote(
         text=str(quote.select_one(".text").text),
         author=str(quote.select_one(".author").text),
-        tags=[tag.text for tag in quote.select(".tag")]
+        tags=[tag.text for tag in quote.select(".tag")],
     )
 
 
@@ -91,7 +93,10 @@ def write_quotes_to_csv(quotes: list[Quote], output_csv_path: str) -> None:
         writer.writerows([astuple(quote) for quote in quotes])
 
 
-def write_authors_to_csv(authors: dict[str, Author], output_csv_path: str) -> None:
+def write_authors_to_csv(
+        authors: dict[str, Author],
+        output_csv_path: str
+) -> None:
     with open(output_csv_path, "w", newline="", encoding="utf-8") as f:
         writer = csv.writer(f)
         writer.writerow(AUTHOR_FIELDS)
