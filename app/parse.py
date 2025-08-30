@@ -103,11 +103,11 @@ def write_authors_to_csv(
         writer.writerows([astuple(author) for author in authors.values()])
 
 
-def main() -> None:
+def main(output_csv_path: str) -> None:
     quotes = get_page_quotes()
-    write_quotes_to_csv(quotes, "quotes.csv")
+    write_quotes_to_csv(quotes, output_csv_path)
     write_authors_to_csv(author_cache, "authors.csv")
 
 
 if __name__ == "__main__":
-    main()
+    main("quotes.csv")
