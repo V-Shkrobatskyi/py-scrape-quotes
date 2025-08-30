@@ -15,12 +15,43 @@ class Quote:
     tags: list[str]
 
 
-def main(output_csv_path: str) -> None:
-    pass
+@dataclass
+class Author:
+    name: str
+    born_date: str
+    born_location: str
+    description: str
+
+
 QUOTE_FIELDS = [field.name for field in fields(Quote)]
+AUTHOR_FIELDS = [field.name for field in fields(Author)]
+
+# authors cache (dict: link -> Author)
+author_cache: dict[str, Author] = {}
+
+
+def parse_single_author(author_link: str) -> Author:
+    if author_link in author_cache:
+        return author_cache[author_link]
+
+    text = requests.get(BASE_URL + author_link).content
+    author_page = BeautifulSoup(text, "html.parser")
+
+    author = Author(
+        name=str(author_page.select_one(".author-title").text),
+        born_date=str(author_page.select_one(".author-born-date").text),
+        born_location=str(author_page.select_one(".author-born-location").text),
+        description=str(author_page.select_one(".author-description").text)
+    )
+
+    author_cache[author_link] = author
+    return author
 
 
 def parse_single_quote(quote: Tag) -> Quote:
+    author_link = quote.select_one("small.author + a")["href"]
+    parse_single_author(author_link)
+
     return Quote(
         text=str(quote.select_one(".text").text),
         author=str(quote.select_one(".author").text),
@@ -60,9 +91,17 @@ def write_quotes_to_csv(quotes: list[Quote], output_csv_path: str) -> None:
         writer.writerows([astuple(quote) for quote in quotes])
 
 
+def write_authors_to_csv(authors: dict[str, Author], output_csv_path: str) -> None:
+    with open(output_csv_path, "w", newline="", encoding="utf-8") as f:
+        writer = csv.writer(f)
+        writer.writerow(AUTHOR_FIELDS)
+        writer.writerows([astuple(author) for author in authors.values()])
+
+
 def main() -> None:
     quotes = get_page_quotes()
     write_quotes_to_csv(quotes, "quotes.csv")
+    write_authors_to_csv(author_cache, "authors.csv")
 
 
 if __name__ == "__main__":
