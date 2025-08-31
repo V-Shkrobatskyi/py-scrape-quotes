@@ -94,9 +94,8 @@ def get_page_quotes() -> list[Quote]:
             )
         except RequestException as e:
             print(
-                f"Warning: Could not fetch quotes next page page {
-                    BASE_URL + next_page_link
-                }: {e}"
+                f"Warning: Could not fetch quotes next page page "
+                f"{BASE_URL + next_page_link}: {e}"
             )
             break
 
