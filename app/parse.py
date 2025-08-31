@@ -45,7 +45,9 @@ def parse_single_author(author_link: str) -> Author:
     author = Author(
         name=author_page.select_one(".author-title").text.strip(),
         born_date=author_page.select_one(".author-born-date").text.strip(),
-        born_location=author_page.select_one(".author-born-location").text.strip(),
+        born_location=author_page.select_one(
+            ".author-born-location"
+        ).text.strip(),
         description=author_page.select_one(".author-description").text.strip()
     )
 
@@ -75,7 +77,9 @@ def get_page_quotes() -> list[Quote]:
         first_page_response.raise_for_status()
         first_page = BeautifulSoup(first_page_response.content, "html.parser")
     except RequestException as e:
-        print(f"Warning: Could not fetch quotes first page page {BASE_URL}: {e}")
+        print(
+            f"Warning: Could not fetch quotes first page page {BASE_URL}: {e}"
+        )
         return [Quote(text="", author="", tags=[""])]
 
     all_quotes = get_single_page_quotes(first_page)
@@ -85,11 +89,13 @@ def get_page_quotes() -> list[Quote]:
         try:
             next_page_response = requests.get(BASE_URL + next_page_link)
             next_page_response.raise_for_status()
-            next_page = BeautifulSoup(next_page_response.content, "html.parser")
+            next_page = BeautifulSoup(
+                next_page_response.content, "html.parser"
+            )
         except RequestException as e:
             print(
                 f"Warning: Could not fetch quotes next page page {
-                BASE_URL + next_page_link
+                    BASE_URL + next_page_link
                 }: {e}"
             )
             break
@@ -122,7 +128,12 @@ def write_authors_to_csv(
         writer = csv.writer(f)
         writer.writerow(AUTHOR_FIELDS)
         writer.writerows([
-            (author.name, author.born_date, author.born_location, author.description)
+            (
+                author.name,
+                author.born_date,
+                author.born_location,
+                author.description
+            )
             for author in authors.values()
         ])
 
